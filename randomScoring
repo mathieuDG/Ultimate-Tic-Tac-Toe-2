@@ -1,0 +1,10 @@
+static int randomSimulation(Table table, Square square) {
+	table.add(square);
+	int x_part = square.getx()/3;
+	int y_part = square.gety()/3;
+	int compt = 0;
+	Random rnd = new Random();
+	while(true) {
+		
+	}
+}
