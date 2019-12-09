@@ -53,34 +53,43 @@ static int[][][] allignes = {{{0,0},{0,1},{0,2}},{{1,0},{1,1},{1,2}},{{2,0},{2,1
                 //System.err.println("row " + randomTable.get(i)[0] + " column " + randomTable.get(i)[1]);
                 
             }
-            int maxScore = -10000000;
+            int maxScore = -100000000;
             int v = 0;
             Square chosenSquare = new Square(-1,-1);
-            if(turn<10){
-            for(Square possibleSquare : table.next_turn(square, -1)) {
-                // System.err.println(possibleSquare.get) + " " + possibleSquare.gety());
-                //System.err.println(turn);
-                v = alphaBeta(table, 3, possibleSquare);
-                // System.err.println("x " +possibleSquare.get)+" y " +possibleSquare.gety()+" Score " + v);
-                if(v>maxScore) {
-                    maxScore = v;
-                    chosenSquare = possibleSquare;
-                }
-            }}
+            if(opponentRow==-1){
+                Square possibleSquare= table.getminTable(1, 1).getSquare(4, 4);
+                chosenSquare = possibleSquare;
+            }
+  //          else if(validActionCount>24){
+//                for(Square possibleSquare : table.next_turn(square, -1)) {
+ //                   // System.err.println(possibleSquare.get) + " " + possibleSquare.gety());
+  //                  //System.err.println(turn);
+//                    v = alphaBeta(table, 3, possibleSquare);
+ //                   //System.err.println("x " +possibleSquare.getx()+" y " +possibleSquare.gety()+" Score " + v);
+  //                  if(v>maxScore) {
+//                        maxScore = v;
+ //                       chosenSquare = possibleSquare;
+  //                  }
+//                }
+                
+ //           }
             
             else {
+                long time = 100/(randomTable.size()+1);
                 for(int[] tab2 :randomTable){
                     Square possibleSquare= table.getminTable(tab2[0]/3, tab2[1]/3).getSquare(tab2[0], tab2[1]);
-                    v = MonteCarlo(table, 3, possibleSquare);
-                        // System.err.println("cc v: "+v+" x: "+possibleSquare.getx()+" y: "+possibleSquare.gety());
+                    
+                    
+                    v = randomSimulationWithTime(table, possibleSquare,time);
+                    //System.err.println("cc v: "+v+" x: "+possibleSquare.getx()+" y: "+possibleSquare.gety());
                     if(v>maxScore) {
                         maxScore = v;
                         chosenSquare = possibleSquare;
                     }
-                     System.err.println("possibleSquare " + possibleSquare.getx() + " " + possibleSquare.gety() +  " Score " + v);
+                     //System.err.println("possibleSquare " + possibleSquare.getx() + " " + possibleSquare.gety() +  " Score " + v);
                     
                 }
-                 System.err.println("chosenSquare " + chosenSquare.getx() + " " + chosenSquare.gety() +  " Score " + v);
+                 //System.err.println("chosenSquare " + chosenSquare.getx() + " " + chosenSquare.gety() +  " Score " + v);
             }
             
              System.out.println(chosenSquare.getx() + " " + chosenSquare.gety());
@@ -107,7 +116,7 @@ static int alphaBeta(Table table, int profondeur, Square formerPlay) {
     if(profondeur == 1) {
         return score(table,formerPlay);}
     else if(profondeur%2==0) {
-        v = +10000000;
+        v = +1000000;
         ArrayList<Square> prochainCoups = table.next_turn(formerPlay, -1);
         table.getMinTable(formerPlay.getx()/3,formerPlay.gety()/3).isPossessed();
         for(Square prochainCoup : prochainCoups ) {
@@ -125,7 +134,7 @@ static int alphaBeta(Table table, int profondeur, Square formerPlay) {
     }
 
     else {
-        v = -10000000;
+        v = -1000000;
         //1 ou -1 à vérifier
         ArrayList<Square> prochainCoups = table.next_turn(formerPlay, 1);
     table.getMinTable(formerPlay.getx()/3,formerPlay.gety()/3).isPossessed();
@@ -288,6 +297,7 @@ static int MonteCarlo(Table table, int profondeur, Square formerPlay) {
     }
     
     static int randomSimulation(Table table, Square square) {
+        
         Square chosenSquare = square;
         int x_part = 0;
         int y_part = 0;
@@ -300,94 +310,93 @@ static int MonteCarlo(Table table, int profondeur, Square formerPlay) {
         int nbWin =0;
         ArrayList<Square> possiblePlays = new ArrayList<Square>();
         int randomInt =0;
-        Table tempTable = table;
         ArrayList<Square> re = new ArrayList<Square>();
+        Boolean fin = false;
         
         //need to reset the pos to 0
-        while(compt < 50) {
-                x_part = chosenSquare.getx()/3;
-                y_part = chosenSquare.gety()/3;
-                pos = (int)Math.pow(-1, compt2);
-                min = tempTable.getMinTable(x_part, y_part);
-                chosenSquare.setPos(pos);
-                re.add(chosenSquare);
-                if(caseGagnante2(table, min, chosenSquare, pos)||isTableFull(tempTable)) {
-                    //System.err.println("caseGagnante");
-                        if(caseGagnante2(table, min, chosenSquare, pos))
-                            min.setPos(pos);
-                        if(est_terminer(table)!=0) {
-                            // System.err.println("cc ");
-                            //System.err.println("win");
-                                chosenSquare = square;
-                                nbWin +=pos;
-                                pos = 0;
-                                possiblePlays.clear();
-                        }
-                        else if(isTableFull(tempTable)) {
-                                //System.err.println("Table full");
-                            int comptPos= 0;
-                            for(MinTable minTable : tempTable.getMinTables()) {
-                                    comptPos += minTable.getPos();
-                                    
-                            }
-                            if(comptPos < 0 ) {
-                        // System.err.println("cc1 ");
-                                            nbWin--;
-                            }
-                            else if(comptPos > 0) {
-                        // System.err.println("cc2 ");
-                                            nbWin++;
-                            }
-                            pos = 0;
-                            possiblePlays.clear();
-                            chosenSquare = square;
-                            }
-                            
-                            
-                            for(Square s: re){
-                                s.setPos(0);
-                            }
-                            re.clear();
-                                compt++;
-                                // System.err.println(compt+" "+nbWin);
-                                compt2=0;
-                            }
-                else {
-                        target = tempTable.getMinTable(chosenSquare.getx()%3, chosenSquare.gety()%3);
-                    //System.err.println("Chosen Square " + chosenSquare.get) + " " + chosenSquare.gety());
-                        //System.err.println("Target " + target.get) + " " + target.gety());
-                        if(target.getPos()==0) {
-                                for(Square possibleSquare : target.getPoss()) {
-                                        if(possibleSquare.getPos()==0) {
-                                                possiblePlays.add(possibleSquare);
-                                        }
-                                }
-                                if(possiblePlays.size()<1) {
-                                    for(MinTable mins : table.getMinTables()) {
-                                            for(Square possibleSquare : mins.getPoss()) {
-                                                    if(possibleSquare.getPos()==0) {
-                                                            possiblePlays.add(possibleSquare);
-                                                    }
-                                            }
-                                    }
-                                }
-                        }
-                        else {
-                                for(MinTable mins : tempTable.getMinTables()) {
-                                        for(Square possibleSquare : mins.getPoss()) {
-                                                if(possibleSquare.getPos()==0) {
-                                                        possiblePlays.add(possibleSquare);
-                                                }
-                                        }
-                                }
-                        }
-                        randomInt = rnd.nextInt(possiblePlays.size());
-                        chosenSquare = possiblePlays.get(randomInt);
-                        compt2++;
-                        possiblePlays.clear();
-                        tempTable = table;
+        //System.err.println("_______________________________________");
+        while(compt < 15) {
+            x_part = chosenSquare.getx()/3;
+            y_part = chosenSquare.gety()/3;
+            pos = (int)Math.pow(-1, compt2);
+            min = table.getMinTable(x_part, y_part);
+            chosenSquare.setPos(pos);
+            min.isPossessed();
+            re.add(chosenSquare);
+                
+                    
+            if(est_terminer(table)!=0) {
+                fin=true;
+                //System.err.println(est_terminer(table)+" "+pos);
+                // System.err.println("cc ");
+                //System.err.println("win");
+                nbWin +=pos;
                         
+            }
+            else if(isTableFull(table)) {
+                fin=true;
+                //System.err.println("Table full");
+                int comptPos= 0;
+                for(MinTable minTable : table.getMinTables()) {
+                    comptPos += minTable.getPos();
+                                    
                 }
+                if(comptPos < 0 ) {
+                    // System.err.println("cc1 ");
+                    nbWin--;
+                }
+                else if(comptPos > 0) {
+                    // System.err.println("cc2 ");
+                    nbWin++;
+                }
+            }
+                            
+            if(fin){
+                fin=false;
+                for(Square s: re){
+                    s.setPos(0);
+                }
+                for(MinTable minis : table.getMinTables()) {
+                    minis.isPossessed();
+                }
+                possiblePlays.clear();
+                re.clear();
+                compt++;
+                //System.err.println(compt+" "+nbWin+" "+compt2);
+                compt2=0;
+                chosenSquare = square;
+            }
+            else {
+                target = table.getMinTable(chosenSquare.getx()%3, chosenSquare.gety()%3);
+                //System.err.println("Chosen Square " + chosenSquare.get) + " " + chosenSquare.gety());
+                //System.err.println("Target " + target.get) + " " + target.gety());
+                if(target.getPos()==0) {
+                    for(Square possibleSquare : target.getPoss()) {
+                        if(possibleSquare.getPos()==0) {
+                            possiblePlays.add(possibleSquare);
+                        }
+                    }
+                }
+                if(possiblePlays.size()<1) {
+                    for(MinTable mins : table.getMinTables()) {
+                        //System.err.println("cc");
+                        if(mins.getPos()==0) {
+                            for(Square possibleSquare : mins.getPoss()) {
+                                //System.err.println("cc2");
+                                if(possibleSquare.getPos()==0) {
+                                    possiblePlays.add(possibleSquare);
+                                    //System.err.println("cc3");
+                                }
+                            }
+                        }
+                    }
+                }
+                //System.err.println(possiblePlays.size());
+                chosenSquare = possiblePlays.get(rnd.nextInt(possiblePlays.size()));
+                compt2++;
+                possiblePlays.clear();
+                    
+            }
                 
 
         }
@@ -395,136 +404,144 @@ static int MonteCarlo(Table table, int profondeur, Square formerPlay) {
         
         return nbWin;
 }
-
-public static boolean caseGagnante(Table table, MinTable minTable, Square square, int pos) {
-        int[][] dir = {{1, 0}, {1, 1}, {0, 1}, {1, -1}};
-        int[][] dirOps = {{-1, 0}, {-1, -1}, {0, -1}, {-1, 1}};
-        int xMax = minTable.getx()*3 , yMax = minTable.gety();
-
-        int x, y;
-        int _x0 = minTable.getx()*2;
-        int _y0 = minTable.gety()*2;
-
-        int nbJetonAligne;
-
-        int dernierJoueur = pos;
-
-        /* Regarde si le dernier coup est gagnant */
-        for (int d = 0; d < 4; d++) {
-            nbJetonAligne = 0;
-            x = square.getx();
-            y = square.gety();
-
-            while (x < xMax && x >= _x0 && y < yMax && y >= _y0 && minTable.getSquare(x, y) != null && minTable.getSquare(x, y).getPos() == dernierJoueur) {
-                nbJetonAligne++;
-                if (nbJetonAligne >= 3) {
-                    return true;
+    
+    static int randomSimulationWithTime(Table table, Square square, long time) {
+        
+        long debut = System.currentTimeMillis();
+        
+        long timePass = System.currentTimeMillis() -debut;
+        
+        Square chosenSquare = square;
+        int x_part = 0;
+        int y_part = 0;
+        int compt = 0;
+        int compt2 = 0;
+        Random rnd = new Random();
+        int pos = 0;
+        MinTable min;
+        MinTable target;
+        int nbWin =0;
+        ArrayList<Square> possiblePlays = new ArrayList<Square>();
+        int randomInt =0;
+        ArrayList<Square> re = new ArrayList<Square>();
+        Boolean fin = false;
+        
+        //System.err.println("_______________________________________");
+        while(timePass < time) {
+            x_part = chosenSquare.getx()/3;
+            y_part = chosenSquare.gety()/3;
+            pos = (int)Math.pow(-1, compt2);
+            min = table.getMinTable(x_part, y_part);
+            chosenSquare.setPos(pos);
+            min.isPossessed();
+            re.add(chosenSquare);
+                
+                    
+            if(est_terminer(table)!=0) {
+                fin=true;
+                //System.err.println(est_terminer(table)+" "+pos);
+                // System.err.println("cc ");
+                //System.err.println("win");
+                //nbWin +=pos;
+                if(pos>0){
+                    nbWin++;
                 }
-                x += dir[d][0];
-                y += dir[d][1];
+                        
             }
-
-            //regarde dans la direction opposée
-            x = square.getx();
-            y = square.gety();
-            nbJetonAligne--;
-
-            while (x < xMax && x >= _x0 && y < yMax && y >= _y0 && minTable.getSquare(x, y) != null && minTable.getSquare(x, y).getPos() == dernierJoueur) {
-                nbJetonAligne++;
-                if (nbJetonAligne >= 3) {
-                    return true;
+            else if(isTableFull(table)) {
+                fin=true;
+                //System.err.println("Table full");
+                int comptPos= 0;
+                for(MinTable minTable : table.getMinTables()) {
+                    comptPos += minTable.getPos();
+                                    
                 }
-                x += dirOps[d][0];
-                y += dirOps[d][1];
+                if(comptPos < 0 ) {
+                    // System.err.println("cc1 ");
+                    //nbWin--;
+                }
+                else if(comptPos > 0) {
+                    // System.err.println("cc2 ");
+                    nbWin++;
+                }
             }
+                            
+            if(fin){
+                fin=false;
+                for(Square s: re){
+                    s.setPos(0);
+                }
+                for(MinTable minis : table.getMinTables()) {
+                    minis.isPossessed();
+                }
+                possiblePlays.clear();
+                re.clear();
+                compt++;
+                //System.err.println(compt+" "+nbWin+" "+compt2);
+                compt2=0;
+                chosenSquare = square;
+                timePass = System.currentTimeMillis() -debut;
+            }
+            else {
+                target = table.getMinTable(chosenSquare.getx()%3, chosenSquare.gety()%3);
+                //System.err.println("Chosen Square " + chosenSquare.get) + " " + chosenSquare.gety());
+                //System.err.println("Target " + target.get) + " " + target.gety());
+                if(target.getPos()==0) {
+                    for(Square possibleSquare : target.getPoss()) {
+                        if(possibleSquare.getPos()==0) {
+                            possiblePlays.add(possibleSquare);
+                        }
+                    }
+                }
+                if(possiblePlays.size()<1) {
+                    for(MinTable mins : table.getMinTables()) {
+                        //System.err.println("cc");
+                        if(mins.getPos()==0) {
+                            for(Square possibleSquare : mins.getPoss()) {
+                                //System.err.println("cc2");
+                                if(possibleSquare.getPos()==0) {
+                                    possiblePlays.add(possibleSquare);
+                                    //System.err.println("cc3");
+                                }
+                            }
+                        }
+                    }
+                }
+                //System.err.println(possiblePlays.size());
+                chosenSquare = possiblePlays.get(rnd.nextInt(possiblePlays.size()));
+                compt2++;
+                possiblePlays.clear();
+                    
+            }
+                
+
         }
-
-        return false;
-
-    }
-
-public static boolean caseGagnante2(Table table, MinTable minTable, Square square, int poss) {
-    int x_part = minTable.getx();
-    int y_part = minTable.gety();
-    int compt = 0;
-        for (int[][] alligne : allignes) {
-            for (int[] pos : alligne) {
-                compt += minTable.getSquare(x_part*3+pos[0],y_part*3+pos[1]).getPos();
-            }
-            if(compt==3||compt==-3) {
-               return true;
-            }
-            compt = 0;        
-        }
-        return false;
+        
+        //System.err.println(compt+" "+nbWin+" "+compt2);
+        
+        
+        return (nbWin*1000)/compt;
 }
 
     public static int est_terminer(Table table) {
-                int posCompt = 0;
-                for (int[][] alligne : allignes) {
-                        posCompt = 0;
-                        for (int[] pos : alligne) {
-                                posCompt += table.getMinTable(pos[0], pos[1]).getPos();
-                        }
-                        if (posCompt == 3) {
-                                return 1;
-                        } else if (posCompt == -3) {
-                                return -1;
-                        }
-                }
-                return 0;
-    }
-    
-    public static boolean isWin(Table table, MinTable min, int pos) {
-
-            int[][] dir = {{1, 0}, {1, 1}, {0, 1}, {1, -1}};
-        int[][] dirOps = {{-1, 0}, {-1, -1}, {0, -1}, {-1, 1}};
-        int xMax = 3 , yMax = 3;
-
-        int x, y;
-        int _x0 = 0;
-        int _y0 = 0;
-        int nbJetonAligne;
-
-        int dernierJoueur = pos;
-
-        /* Regarde si le dernier coup est gagnant */
-        for (int d = 0; d < 4; d++) {
-            nbJetonAligne = 0;
-            x = min.getx();
-            y = min.gety();
-
-            while (x < xMax && x >= _x0 && y < yMax && y >= _y0 &&  table.getMinTable(x,y) != null && table.getMinTable(x,y).getPos() == dernierJoueur) {
-                nbJetonAligne++;
-                if (nbJetonAligne >= 3) {
-                    return true;
-                }
-                x += dir[d][0];
-                y += dir[d][1];
+        int posCompt = 0;
+        for (int[][] alligne : allignes) {
+            posCompt = 0;
+            for (int[] pos : alligne) {
+                posCompt += table.getMinTable(pos[0], pos[1]).getPos();
             }
-
-            //regarde dans la direction opposée
-            x = min.getx();
-            y = min.gety();
-            nbJetonAligne--;
-
-            while (x < xMax && x >= _x0 && y < yMax && y >= _y0 && table.getMinTable(x,y) != null && table.getMinTable(x,y).getPos() == dernierJoueur) {
-                nbJetonAligne++;
-                if (nbJetonAligne >= 3) {
-                    return true;
-                }
-                x += dirOps[d][0];
-                y += dirOps[d][1];
+            if (posCompt == 3) {
+                return 1;
+            } else if (posCompt == -3) {
+                return -1;
             }
         }
-
-
-        return false;
+        return 0;
     }
 
  public static boolean isTableFull(Table table) {
          for(MinTable min : table.getMinTables()) {
-                 if(min.getPos()!=0) {
+                 if(min.getPos()==0) {
                         for(Square square : min.getPoss()) {
                                 if(square.getPos()==0) {
                                         return false;
